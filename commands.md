@@ -6,4 +6,4 @@ pip list
 pip freeze > requirements.txt
 pip uninstall -r requirements.txt -y
 
-pip install requirements.txt
+pip install -r requirements.txt
