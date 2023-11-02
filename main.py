@@ -287,9 +287,9 @@ async def root():
 async def check_bais(item: Item):
     # Access the data from the request body
     text = item.text
-
+    result = Check_bias(text)
     # Perform some logic with the data
     # ...
 
     # Return a response as per your requirements
-    return {"message": "text ayalzed successfully", "result": text}
+    return {"message": "text ayalzed successfully", "result": result}
