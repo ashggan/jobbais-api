@@ -20,8 +20,7 @@ requests
 safetensors
 sniffio
 starlette
-tokenizers==0.11.3
-tqdm
+tokenizers>=0.11.1,<0.14tqdm
 transformers
 typing_extensions
 urllib3

@@ -13,7 +13,6 @@ happy_tt = HappyTextToText("T5", "vennify/t5-base-grammar-correction")
 args = TTSettings(num_beams=5, min_length=1)
 
 
-
 # List of neutral words
 neutral_words = [
     "drive",
@@ -244,8 +243,6 @@ def Check_bias(text1):
     return output
 
 
-
-
 # Create a Pydantic model for the request body
 
 
@@ -260,11 +257,11 @@ async def root():
 
 # Define a route that handles POST requests
 @app.post("/classify/")
-async def check_bais(item: Item):
+async def process(item: Item):
     # Access the data from the request body
     text = item.text
     # Perform some logic with the data
-    result = Check_bias(text)
+    result = await Check_bias(text)
 
     # Return a response as per your requirements
     return {"message": "text was analyzed successfully", "result": result}
