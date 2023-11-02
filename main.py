@@ -13,6 +13,239 @@ happy_tt = HappyTextToText("T5", "vennify/t5-base-grammar-correction")
 args = TTSettings(num_beams=5, min_length=1)
 
 
+
+# List of neutral words
+neutral_words = [
+    "drive",
+    "motivated",
+    "guide",
+    "continue",
+    "ethic",
+    "choice",
+    "excellent",
+    "person",
+    "confident",
+    "resilient",
+    "structured",
+    "inflexible",
+    "tech industry",
+    "equity options",
+    "is adventurous",
+    "employees",
+    "independent",
+    "table tennis",
+    "billiards table",
+    "should",
+    "challenging",
+    "they",
+    "their",
+    "themselves",
+    "self-assured",
+    "energetic",
+    "assertive",
+    "aspiring",
+    "courageous",
+    "determined",
+    "protective",
+    "self-reliant",
+    "influential",
+    "expressive",
+    "guiding force",
+    "high-speed",
+    "daring",
+    "logical",
+    "resolute",
+    "committed",
+    "expert",
+    "impartial",
+    "outstanding performer",
+    "brag",
+    "demanding",
+    "bravery",
+    "considerate",
+    "innovative",
+    "flexible",
+    "select",
+    "inquisitive",
+    "outstanding",
+    "adaptable",
+    "handling multiple tasks",
+    "well-being",
+    "creative",
+    "instinctive",
+    "long-term planning",
+    "tough",
+    "aware of oneself",
+    "ethical",
+    "reliable",
+    "current",
+    "health program",
+    "foster",
+    "instruct",
+    "reliable",
+    "society",
+    "assisting",
+    "devoted",
+    "passion",
+    "relational",
+    "link",
+    "dedicate",
+    "they",
+    "concur",
+    "understanding",
+    "responsive",
+    "loving",
+    "experience",
+    "assist",
+    "work together",
+    "truthful",
+    "confidence",
+    "comprehend",
+    "sympathy",
+    "contribute",
+    "courteous",
+    "considerate",
+    "supportive",
+    "their",
+    "theirs",
+    "themselves",
+    "androgynous",
+    "encourage",
+    "collective",
+    "expressive",
+    "complimentable",
+    "tender",
+    "mutual",
+    "connection",
+    "humility",
+    "agreeable",
+    "silent",
+    "empathy",
+    "friendly",
+    "leading",
+    "produce",
+    "fluent English speaker",
+    "well-groomed appearance",
+    "indigenous",
+    "cultural alignment",
+    "diverse",
+    "clean-cut",
+    "tidy hair",
+    "expert",
+    "subordinate",
+    "easy task",
+    "informal meeting",
+    "personal inspiration",
+    "tech-savvy",
+    "supportive leadership",
+    "community",
+    "eastern",
+    "avoid using",
+    "english proficiency",
+    "fluent",
+    "unauthorized individuals",
+    "indigenous Northern people",
+    "hispanic",
+    "latinx",
+    "mobile worker",
+    "inclusion list",
+]
+
+
+def replace_gendered_pronouns(text):
+    # Define a dictionary of gendered pronouns and their gender-neutral replacements
+    word_dict = dict(zip(gendered_pronouns, neutral_words))
+
+    swapped_words = []  # Initialize an empty list to store swapped words
+
+    # Use regular expressions to find and replace gendered pronouns in the text
+    for pronoun, replacement in word_dict.items():
+        # Use word boundaries to match whole words only
+        pattern = r'\b' + re.escape(pronoun) + r'\b'
+        matches = re.findall(pattern, text, flags=re.IGNORECASE)
+
+        # Iterate over the matches and replace them in the text
+        for match in matches:
+            text = re.sub(pattern, replacement, text,
+                          count=1, flags=re.IGNORECASE)
+            swapped_words.append({match: replacement})
+
+    return text, swapped_words
+
+
+def model_eval(text):
+    # Put the model in evaluation mode
+    model.eval()
+
+    # Input text
+    input_text = text
+
+    # Tokenize the input text
+    inputs = tokenizer(input_text, padding='max_length',
+                       truncation=True, max_length=512, return_tensors="pt")
+
+    # Make the prediction
+    with torch.no_grad():
+        outputs = model(**inputs)
+
+    logits = outputs.logits
+    predicted_label = (logits > 0).int().item()
+
+    return predicted_label
+
+
+def Check_bias(text1):
+    output = {}
+    if text1:
+        predicted_label = model_eval(text1)
+        # Convert 0 or 1 label back to a meaningful label if needed
+        label_mapping = {0: "Negative", 1: "Positive"}
+        predicted_label_text = label_mapping[predicted_label]
+        # print(f"Predicted Label: {predicted_label_text}")
+        if predicted_label_text == "Positive":
+            rewritten_sentence, swapped_words = replace_gendered_pronouns(
+                text1)
+            words = rewritten_sentence.split()
+            word_count = 0
+            chunk = ""
+            target_word_count = 35
+            result = ""
+
+            for word in words:
+                # Add the sentence to the current chunk
+                chunk += word + " "
+
+                words_list = chunk.split()
+                word_count = len(words_list)
+
+                # Check if the word count exceeds the target
+                if word_count >= target_word_count:
+                    grammar_text = happy_tt.generate_text(
+                        "grammar: " + chunk, args=args)
+                    result += grammar_text.text
+                    chunk = ""
+                    word_count = 0
+
+            # Process the remaining chunk if any
+            if chunk:
+                grammar_text = happy_tt.generate_text(
+                    "grammar: " + chunk, args=args)
+                result += grammar_text.text
+
+            # Add the prefix "grammar: " before each input
+            # result = happy_tt.generate_text("grammar: "+rewritten_sentence, args=args)
+            # print(result.text) # This sentence has bad grammar.
+            # return(result)
+
+            output["predicted_label"] = predicted_label_text
+            output["result"] = result
+            output["swapped_words"] = swapped_words
+
+    return output
+
+
+
+
 # Create a Pydantic model for the request body
 
 
@@ -30,9 +263,8 @@ async def root():
 async def check_bais(item: Item):
     # Access the data from the request body
     text = item.text
-
     # Perform some logic with the data
-    # ...
+    result = Check_bias(text)
 
     # Return a response as per your requirements
-    return {"message": "text ayalzed successfully", "name": text}
+    return {"message": "text was analyzed successfully", "result": result}
