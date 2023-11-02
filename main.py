@@ -7,6 +7,10 @@ app = FastAPI()
 
 # Create a Pydantic model for the request body
 
+tokenizer = AutoTokenizer.from_pretrained("saurabhg2083/model_bert")
+model = AutoModelForSequenceClassification.from_pretrained(
+    "saurabhg2083/model_bert")
+
 
 class Item(BaseModel):
     text: str
