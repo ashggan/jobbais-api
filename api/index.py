@@ -1,4 +1,3 @@
-from requests import request
 from flask import Flask, jsonify
 
 app = Flask(__name__)
@@ -12,17 +11,6 @@ def home():
     return jsonify(data)
 
 
-@app.route('/about', methods=['POST'])
+@app.route('/about')
 def about():
-    if request.method == 'POST':
-        # Retrieve data from the request
-        data = request.get_json()
-
-        # Process the data
-        # ...
-
-        # Create a JSON response
-        response = {'message': 'Received POST request', 'data': data}
-
-        # Return the JSON response
-        return jsonify(response)
+    return 'About'
