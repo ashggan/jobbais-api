@@ -3,7 +3,8 @@
 *.pyc
 __pycache__
 node_modules
-
+main.py
+ 
 # Environments 
 .env 
 .venv 

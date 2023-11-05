@@ -1,14 +1,14 @@
 from flask import Flask, jsonify, request
 # from pydantic import BaseModel
 # from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
-from happytransformer import HappyTextToText, TTSettings
+# from happytransformer import HappyTextToText, TTSettings
 
 
 # tokenizer = AutoTokenizer.from_pretrained("saurabhg2083/model_bert")
 # model = AutoModelForSequenceClassification.from_pretrained(
 #     "saurabhg2083/model_bert")
-happy_tt = HappyTextToText("T5", "vennify/t5-base-grammar-correction")
-args = TTSettings(num_beams=5, min_length=1)
+# happy_tt = HappyTextToText("T5", "vennify/t5-base-grammar-correction")
+# args = TTSettings(num_beams=5, min_length=1)
 
 
 app = Flask(__name__)
@@ -33,8 +33,8 @@ def handle_post():
 
     # Process the data or perform any desired operations
     # For example, let's assume the JSON data contains a 'name' field
-    name = data.get('name')
-    if name:
-        return f"Hello, {name}! This is a POST request."
+    text = data.get('text')
+    if text:
+        return f"Hello, {text}! This is a POST request."
     else:
-        return "No name provided in the request."
+        return "No text provided in the request."
