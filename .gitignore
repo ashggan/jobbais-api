@@ -3,7 +3,7 @@
 *.pyc
 __pycache__
 node_modules
-main.py
+mains.py
  
 # Environments 
 .env 
