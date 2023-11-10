@@ -1,2 +1,5 @@
 flask
-transformers 
+gunicorn
+transformers
+torch
+happytransformer
